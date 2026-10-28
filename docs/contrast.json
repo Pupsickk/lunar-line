@@ -1,0 +1,26 @@
+[
+  {
+    "foreground": "#292330",
+    "background": "#f8f5f0",
+    "ratio": 14.02,
+    "normalTextPass": true
+  },
+  {
+    "foreground": "#645c68",
+    "background": "#f8f5f0",
+    "ratio": 5.9,
+    "normalTextPass": true
+  },
+  {
+    "foreground": "#ffffff",
+    "background": "#654b70",
+    "ratio": 7.52,
+    "normalTextPass": true
+  },
+  {
+    "foreground": "#e9e2ec",
+    "background": "#2c2632",
+    "ratio": 11.57,
+    "normalTextPass": true
+  }
+]

@@ -1,0 +1,34 @@
+{
+  "pages": 17,
+  "errors": [],
+  "webp": [
+    {
+      "name": "deep.webp",
+      "bytes": 10156
+    },
+    {
+      "name": "relationships.webp",
+      "bytes": 9306
+    },
+    {
+      "name": "one-question.webp",
+      "bytes": 8960
+    },
+    {
+      "name": "career.webp",
+      "bytes": 9058
+    },
+    {
+      "name": "hero.webp",
+      "bytes": 19256
+    },
+    {
+      "name": "choice.webp",
+      "bytes": 10798
+    },
+    {
+      "name": "month.webp",
+      "bytes": 8230
+    }
+  ]
+}

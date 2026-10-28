@@ -1,0 +1,15 @@
+{
+  "name": "Лунная линия — макет ЛР4",
+  "id": "lunar-line-lab4-local",
+  "api": "1.0.0",
+  "main": "code.js",
+  "editorType": [
+    "figma"
+  ],
+  "documentAccess": "dynamic-page",
+  "networkAccess": {
+    "allowedDomains": [
+      "none"
+    ]
+  }
+}
