@@ -1,0 +1,24 @@
+erDiagram
+    USERS ||--o| PROFILES : hasOne
+    USERS o|--o{ ORDERS : owns
+    USERS ||--o{ REVIEWS : writes
+    CATEGORIES o|--o{ CATEGORIES : parent
+    CATEGORIES ||--o{ PRODUCTS : contains
+    PRODUCTS ||--o{ REVIEWS : receives
+    ORDERS ||--|{ ORDER_PRODUCT : contains
+    PRODUCTS ||--o{ ORDER_PRODUCT : included
+    ORDERS {
+        bigint id PK
+        uuid order_number UK
+        uuid checkout_key UK
+        string access_token_hash
+        decimal total_amount
+        string status
+    }
+    ORDER_PRODUCT {
+        bigint order_id FK
+        bigint product_id FK
+        string product_name
+        integer quantity
+        decimal price
+    }
