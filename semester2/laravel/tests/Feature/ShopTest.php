@@ -1,0 +1,13 @@
+<?php
+namespace Tests\Feature;
+use Tests\TestCase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Models\{Product,Category,Order,User};
+use Illuminate\Support\Str;
+class ShopTest extends TestCase {use RefreshDatabase;
+ public function test_catalog_and_product_load_database_relations():void{$this->seed();$this->get('/')->assertOk()->assertSee('Лунная линия');$this->get('/catalog?category=love')->assertOk()->assertSee('Об отношениях')->assertDontSee('Дело по душе');$this->get('/product/one-question')->assertOk()->assertSee('Учебный отзыв');$this->get('/product/missing')->assertNotFound();}
+ public function test_order_is_persisted_and_price_is_taken_from_database():void{$p=Product::factory()->create(['price'=>'790.00','quantity'=>5]);$key=(string)Str::uuid();$response=$this->withSession(['cart'=>[$p->id=>2],'checkout_key'=>$key])->post('/checkout',['checkout_key'=>$key,'name'=>'Тест','email'=>'test@example.test','agree'=>'1','total_amount'=>'1']);$response->assertRedirect();$o=Order::firstOrFail();$this->assertSame('1580.00',$o->total_amount);$this->assertSame(2,$o->products->first()->pivot->quantity);$this->assertSame(3,$p->fresh()->quantity);$this->get($response->headers->get('Location'))->assertOk()->assertSee('Заказ сохранён');$this->get('/orders/'.$o->order_number.'?token=bad')->assertNotFound();}
+ public function test_invalid_form_and_insufficient_stock_do_not_create_orders():void{$p=Product::factory()->create(['quantity'=>0]);$key=(string)Str::uuid();$this->withSession(['cart'=>[$p->id=>1],'checkout_key'=>$key])->post('/checkout',['checkout_key'=>$key,'name'=>' ','email'=>'bad'])->assertSessionHasErrors(['name','email','agree']);$this->withSession(['cart'=>[$p->id=>1],'checkout_key'=>$key])->post('/checkout',['checkout_key'=>$key,'name'=>'Тест','email'=>'test@example.test','agree'=>'1'])->assertSessionHasErrors('cart');$this->assertDatabaseCount('orders',0);}
+ public function test_only_admin_can_view_orders():void{$this->get('/admin/orders')->assertRedirect('/login');$user=User::factory()->create();$this->actingAs($user)->get('/admin/orders')->assertForbidden();$user->role='admin';$user->save();$this->actingAs($user)->get('/admin/orders')->assertOk();}
+ public function test_cart_changes_quantity_and_clears_on_zero():void{$p=Product::factory()->create();$this->post('/cart/'.$p->id)->assertRedirect('/cart');$this->patch('/cart/'.$p->id,['quantity'=>3])->assertSessionHas('cart.'.$p->id,3);$this->patch('/cart/'.$p->id,['quantity'=>0])->assertSessionMissing('cart.'.$p->id);}
+}

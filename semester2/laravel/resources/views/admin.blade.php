@@ -1,0 +1,3 @@
+@extends('layouts.app')
+@section('title','Заказы продавца — Лунная линия')
+@section('content')<h1>Заказы продавца</h1><form method="post" action="{{route('logout')}}">@csrf<button class="btn">Выйти</button></form>@forelse($orders as $order)<article class="order-box"><h2>{{$order->order_number}}</h2><p>{{$order->customer_name}} — {{$order->email}} — {{$order->phone}}</p><p>{{$order->notes}}</p><p>{{$order->total_amount}} ₽ · {{$order->status}} · {{$order->created_at}}</p>@foreach($order->products as $p)<p>{{$p->pivot->product_name}} × {{$p->pivot->quantity}}</p>@endforeach</article>@empty<p>Заказов пока нет.</p>@endforelse{{$orders->links('pagination::simple-default')}}@endsection

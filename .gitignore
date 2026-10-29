@@ -2,3 +2,9 @@
 node_modules/
 .DS_Store
 *.log
+/semester2/laravel/vendor/
+/semester2/laravel/.env
+/semester2/laravel/.phpunit.cache/
+/semester2/laravel/database/*.sqlite
+/semester2/chat/node_modules/
+/semester2/wordpress/wp-config.php

@@ -1,0 +1,56 @@
+name: Semester 2 tests
+on:
+  push:
+    paths: ['semester2/**', '.github/workflows/semester2.yml']
+  pull_request:
+    paths: ['semester2/**', '.github/workflows/semester2.yml']
+permissions:
+  contents: read
+jobs:
+  laravel:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: local-ci-only
+          MYSQL_DATABASE: lunar_line
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -plocal-ci-only"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+    defaults:
+      run:
+        working-directory: semester2/laravel
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, pdo_mysql, pdo_sqlite, xml, curl, zip
+          tools: composer:v2.8
+          coverage: none
+      - run: composer install --no-interaction --prefer-dist --no-progress
+      - run: cp .env.example .env && php artisan key:generate && php artisan route:list && php artisan view:cache
+      - run: vendor/bin/phpunit
+      - name: Migrate, seed and roll back on MySQL
+        env:
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: lunar_line
+          DB_USERNAME: root
+          DB_PASSWORD: local-ci-only
+        run: php artisan migrate --seed --force && php artisan migrate:rollback --force && php artisan migrate --seed --force
+  chat:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: semester2/chat
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --no-audit --no-fund
+      - run: npm test
