@@ -12,13 +12,13 @@ if (-not $phpCommand) {
     $env:PATH = (Split-Path $phpPath) + ';' + $env:PATH
 }
 function Invoke-Php {
-    param([Parameter(ValueFromRemainingArguments = $true)][string[]]$Arguments)
+    param([string[]]$Arguments)
     & php @Arguments
     if ($LASTEXITCODE -ne 0) { throw ('PHP command failed: ' + ($Arguments -join ' ')) }
 }
 Push-Location $appPath
 try {
-    Invoke-Php @('-r', "exit(PHP_VERSION_ID >= 80200 && extension_loaded('pdo_sqlite') ? 0 : 1);")
+    Invoke-Php -Arguments @('-r', "exit(PHP_VERSION_ID >= 80200 && extension_loaded('pdo_sqlite') ? 0 : 1);")
     if (-not (Test-Path -LiteralPath 'vendor\autoload.php')) {
         $composerCommand = Get-Command composer -ErrorAction SilentlyContinue
         if ($composerCommand) {
@@ -38,15 +38,15 @@ try {
         New-Item -ItemType File -Path 'database\database.sqlite' -Force | Out-Null
     }
     $env:APP_URL = 'http://127.0.0.1:' + $Port
-    Invoke-Php @('artisan', 'config:clear')
-    if ((Get-Content -LiteralPath '.env' -Encoding UTF8) -match '^APP_KEY=\s*$') { Invoke-Php @('artisan', 'key:generate') }
-    Invoke-Php @('artisan', 'migrate', '--force')
+    Invoke-Php -Arguments @('artisan', 'config:clear')
+    if ((Get-Content -LiteralPath '.env' -Encoding UTF8) -match '^APP_KEY=\s*$') { Invoke-Php -Arguments @('artisan', 'key:generate') }
+    Invoke-Php -Arguments @('artisan', 'migrate', '--force')
     # The seeder resets availability: only seed an empty catalogue.
-    Invoke-Php @('artisan', 'app:seed-catalog-if-empty')
+    Invoke-Php -Arguments @('artisan', 'app:seed-catalog-if-empty')
     if ($PrepareOnly) { return }
     Write-Host ('Site: ' + $env:APP_URL)
     Write-Host 'Orders are saved locally. Payments and email are not connected.'
     Write-Host 'Press Ctrl+C to stop. Run start-site.ps1 again to restart.'
     if (-not $NoBrowser) { Start-Process $env:APP_URL }
-    Invoke-Php @('artisan', 'serve', '--host=127.0.0.1', ('--port=' + $Port))
+    Invoke-Php -Arguments @('artisan', 'serve', '--host=127.0.0.1', ('--port=' + $Port))
 } finally { Pop-Location }
