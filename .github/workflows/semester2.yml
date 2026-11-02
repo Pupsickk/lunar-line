@@ -1,12 +1,32 @@
 name: Semester 2 tests
 on:
   push:
-    paths: ['semester2/**', '.github/workflows/semester2.yml']
+    paths: ['semester2/**', 'start-site.*', '.github/workflows/semester2.yml']
   pull_request:
-    paths: ['semester2/**', '.github/workflows/semester2.yml']
+    paths: ['semester2/**', 'start-site.*', '.github/workflows/semester2.yml']
 permissions:
   contents: read
 jobs:
+  windows-startup:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, pdo_sqlite, xml, curl, zip
+          tools: composer:v2.8
+          coverage: none
+      - name: Prepare SQLite site twice without resetting catalogue
+        shell: pwsh
+        run: |
+          ./start-site.ps1 -PrepareOnly
+          ./start-site.ps1 -PrepareOnly
+      - name: Compile views and test shopping flow
+        working-directory: semester2/laravel
+        run: |
+          php artisan view:cache
+          php vendor/bin/phpunit
   laravel:
     runs-on: ubuntu-latest
     services:
